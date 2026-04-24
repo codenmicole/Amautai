@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amautai - Tutor Inteligente de Pensamiento Computacional</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar horizontal-nav">
+        <div class="logo-container-horizontal">
+            <img src="logo_simbolo.png" alt="Amautai Símbolo" class="logo-symbol">
+            <span class="logo-text-horizontal">Amautai</span>
+            <span class="logo-dot-horizontal">.com</span>
+        </div>
+        <ul>
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#metodologia">Metodología</a></li>
+            <li><a href="#prototipo" class="btn-nav">Ver Prototipo</a></li>
+        </ul>
+    </nav>
+
+    <header id="inicio" class="hero">
+        <div class="hero-content">
+            <h1>Amautai.com: El tutor inteligente que <span>empodera al docente</span></h1>
+            <p>Transforma el aprendizaje de <strong>Pensamiento Computacional</strong> mediante WhatsApp, con seguimiento en tiempo real para tu aula.</p>
+            <a href="#prototipo" class="cta-button">Probar Demo</a>
+        </div>
+    </header>
+
+    <section id="metodologia" class="features">
+        <h2>¿Por qué Amautai para tu clase?</h2>
+        <div class="grid-features">
+            <div class="card">
+                <h3>📊 Monitoreo Real</h3>
+                <p>Visualiza el progreso de cada estudiante sin revisar chat por chat.</p>
+            </div>
+            <div class="card">
+                <h3>🤖 IA Especializada</h3>
+                <p>Contenido enfocado exclusivamente en desarrollar el pensamiento lógico.</p>
+            </div>
+            <div class="card">
+                <h3>📱 Accesibilidad</h3>
+                <p>Funciona en WhatsApp, eliminando las barreras de instalación de software pesado.</p>
+            </div>
+        </div>
+    </section>
+
+<section id="prototipo" style="padding: 60px 0; background: #f0f2f5; text-align: center;">
+    <h2 style="margin-bottom: 30px;">Interactúa con Amautai</h2>
+     <p>El asistente perfecto que te ayuda a monitorear el aprendizaje de tus estudiantes</p>
+    <div style="max-width: 800px; margin: 0 auto; border-radius: 20px; overflow: hidden; shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <iframe src="prototipo.html" width="100%" height="700px" frameborder="0"></iframe>
+    </div>
+</section>
+ 
+<section id="inscripcion" class="registration-section">
+    <div class="container-form">
+        <div class="form-text">
+            <h2>Únete a la comunidad <span>Amautai</span></h2>
+            <p>Sé parte de la revolución educativa STEAM. Déjanos tus datos para darte acceso temprano al tutor inteligente.</p>
+            <ul class="form-benefits">
+                <li><i class="fas fa-check-circle"></i> Acceso gratuito al prototipo</li>
+                <li><i class="fas fa-check-circle"></i> Reportes mensuales de avance</li>
+                <li><i class="fas fa-check-circle"></i> Capacitaciones exclusivas</li>
+            </ul>
+        </div>
+
+        <div class="form-card">
+            <form id="form-amautai">
+              <div class="input-group">
+                  <input type="text" name="Nombre" placeholder="Nombre" required>
+                  <input type="text" name="Apellido" placeholder="Apellido" required>
+              </div>
+              <input type="email" name="Email" placeholder="Correo electrónico" required>
+              <input type="tel" name="Celular" placeholder="Número de celular" required>
+              
+              <label for="rol">¿Cuál es tu rol?</label>
+              <select id="rol" name="Rol" required>
+                  <option value="" disabled selected>Selecciona una opción</option>
+                  <option value="Docente">Docente</option>
+                  <option value="Estudiante">Estudiante</option>
+                  <option value="Director">Director de escuela</option>
+                  <option value="Funcionario">Funcionario Público</option>
+                  <option value="Otro">Otro</option>
+              </select>
+          
+              <button type="submit" id="submit-btn" class="submit-btn">Registrarme ahora</button>
+          </form>
+          <script>
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbyCbWYqP9tep41-vk91Jm6f6fj07LHqyjNJozGKIVp92gCqxiF45FGIAkesZB-j1jw/exec' // Pega tu URL aquí
+            const form = document.getElementById('form-amautai')
+            const btn = document.getElementById('submit-btn')
+          
+            form.addEventListener('submit', e => {
+              e.preventDefault()
+              btn.disabled = true
+              btn.innerText = "Enviando..."
+              
+              fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+                .then(response => {
+                    alert('¡Gracias! Te has registrado correctamente en Amautai.')
+                    btn.disabled = false
+                    btn.innerText = "Registrarme ahora"
+                    form.reset()
+                })
+                .catch(error => {
+                    console.error('Error!', error.message)
+                    alert('Hubo un error. Intenta de nuevo.')
+                    btn.disabled = false
+                })
+            })
+          </script>
+        </div>
+    </div>
+</section>
+
+<footer class="footer-styled">
+    <div class="footer-wave">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35c63.47,33.41,111.2,53.15,162.22,63.22,47.85,9.44,105.27,11.2,159.17,5.87Z" class="shape-fill"></path>
+        </svg>
+    </div>
+    
+    <div class="footer-content">
+        <div class="footer-brand">
+            <img src="logo.png" alt="Amautai" class="footer-logo">
+            <p>El futuro de la educación STEAM en manos de los docentes.</p>
+            <div class="location">
+                <span><i class="fas fa-map-marker-alt"></i> Arequipa, Perú</span>
+            </div>
+        </div>
+
+        <div class="footer-links">
+            <h4>Contacto</h4>
+            <a href="https://wa.me/51958149176" class="wa-contact" target="_blank">
+                <i class="fab fa-whatsapp"></i> +51 958 149 176
+            </a>
+            <p>soporte@amautai.com</p>
+        </div>
+
+        <div class="footer-social">
+            <h4>Síguenos</h4>
+            <div class="social-icons">
+                <a href="https://www.facebook.com/profile.php?id=61585946237205" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/amautai.1?utm_source=qr&igsh=MXR4Mm44cTY4Y3E2NQ==" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-credits">
+        <p>Hecho con el ❤️ en Arequipa | &copy; 2026 Amautai.com</p>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Amautai — Prototipo</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg1: #ffffff; --bg2: #f5f5f3; --bg3: #eeede9;
+    --tx1: #1a1a18; --tx2: #6b6b67; --tx3: #a0a09c;
+    --bd1: rgba(0,0,0,0.12); --bd2: rgba(0,0,0,0.22);
+    --rmd: 8px; --rlg: 12px;
+    --font: system-ui, -apple-system, sans-serif;
+  }
+  body { 
+  font-family: var(--font); 
+  background: #130f40; /* El azul oscuro de Amautai */
+  min-height: 100vh; 
+  display: flex; 
+  align-items: flex-start; 
+  justify-content: center; 
+  padding: 24px 16px; 
+}
+  .wrapper { width: 100%; max-width: 720px; }
+  .app-shell { 
+  display: flex; 
+  flex-direction: column; 
+  min-height: 620px; 
+  background: var(--bg3); 
+  border-radius: var(--rlg); 
+  overflow: hidden; 
+  box-shadow: 0 10px 50px rgba(0,0,0,0.5); /* Sombra más profunda */
+}
+  .top-bar { display: flex; background: var(--bg2); border-bottom: 0.5px solid var(--bd1); }
+  .tab-btn { flex: 1; padding: 12px 16px; border: none; background: transparent; cursor: pointer; font-size: 13px; font-weight: 400; color: var(--tx2); display: flex; align-items: center; justify-content: center; gap: 6px; border-bottom: 2px solid transparent; transition: all 0.15s; font-family: var(--font); }
+  .tab-btn.active { color: var(--tx1); border-bottom: 2px solid var(--tx1); font-weight: 500; }
+  .view { display: none; flex-direction: column; flex: 1; }
+  .view.active { display: flex; }
+
+  .wa-shell { display: flex; flex-direction: column; flex: 1; max-width: 440px; margin: 16px auto; width: 100%; background: var(--bg1); border-radius: var(--rlg); border: 0.5px solid var(--bd1); overflow: hidden; }
+  .wa-header { background: #075e54; color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  .wa-avatar { width: 36px; height: 36px; border-radius: 50%; background: #128c7e; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .wa-header-name { font-size: 14px; font-weight: 500; }
+  .wa-header-status { font-size: 11px; opacity: 0.8; }
+  .day-pill { margin-left: auto; font-size: 10px; background: rgba(255,255,255,0.2); padding: 3px 9px; border-radius: 10px; flex-shrink: 0; }
+  .wa-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: #ece5dd; min-height: 340px; max-height: 400px; }
+  .msg { max-width: 88%; padding: 8px 12px; border-radius: 8px; font-size: 13px; line-height: 1.55; }
+  .msg.bot { background: #fff; align-self: flex-start; border-radius: 0 8px 8px 8px; color: #222; }
+  .msg.user { background: #dcf8c6; align-self: flex-end; border-radius: 8px 0 8px 8px; color: #222; }
+  .msg-time { font-size: 10px; color: #999; text-align: right; margin-top: 3px; }
+  .msg.bot .msg-time { text-align: left; }
+  .feedback-box { margin-top: 8px; padding: 8px 10px; border-radius: 6px; font-size: 12px; line-height: 1.65; }
+  .feedback-box.correct { background: #e8f5e2; border-left: 3px solid #639922; color: #2d5a0e; }
+  .feedback-box.wrong { background: #fdf0f0; border-left: 3px solid #d84040; color: #7a1c1c; }
+  .options-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .opt-btn { background: #e7f3f8; border: 0.5px solid #b2d8eb; border-radius: 6px; padding: 8px 12px; font-size: 12px; cursor: pointer; text-align: left; color: #0a7ab4; transition: background 0.1s; font-family: var(--font); }
+  .opt-btn:hover { background: #cde9f5; }
+  .opt-btn:disabled { opacity: 0.55; cursor: default; }
+  .wa-input-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #f0f0f0; border-top: 0.5px solid #ddd; }
+  .wa-input { flex: 1; border: none; border-radius: 20px; padding: 8px 14px; font-size: 13px; background: #fff; outline: none; font-family: var(--font); }
+  .wa-send { width: 36px; height: 36px; background: #128c7e; border: none; border-radius: 50%; cursor: pointer; color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .typing-indicator { display: none; align-items: center; gap: 4px; padding: 8px 12px; background: #fff; border-radius: 0 8px 8px 8px; max-width: 60px; align-self: flex-start; }
+  .typing-indicator.show { display: flex; }
+  .dot { width: 6px; height: 6px; background: #aaa; border-radius: 50%; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  .dash { padding: 16px; display: flex; flex-direction: column; gap: 14px; flex: 1; overflow-y: auto; }
+  .dash-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .dash-title { font-size: 16px; font-weight: 500; color: var(--tx1); }
+  .gen-report-btn { padding: 7px 14px; border-radius: var(--rmd); border: 0.5px solid var(--bd2); background: transparent; font-size: 12px; cursor: pointer; color: var(--tx2); transition: background 0.1s; font-family: var(--font); }
+  .gen-report-btn:hover { background: var(--bg2); }
+  .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+  .metric-card { background: var(--bg2); border-radius: var(--rmd); padding: 12px; }
+  .metric-label { font-size: 11px; color: var(--tx2); margin-bottom: 4px; }
+  .metric-val { font-size: 22px; font-weight: 500; color: var(--tx1); }
+  .metric-sub { font-size: 11px; color: var(--tx3); margin-top: 2px; }
+  .students-table { background: var(--bg1); border-radius: var(--rlg); border: 0.5px solid var(--bd1); overflow: hidden; }
+  .table-head { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 1.1fr; padding: 8px 14px; background: var(--bg2); font-size: 11px; color: var(--tx2); font-weight: 500; }
+  .student-row { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 1.1fr; padding: 10px 14px; border-top: 0.5px solid var(--bd1); font-size: 13px; align-items: center; cursor: pointer; transition: background 0.1s; }
+  .student-row:hover { background: var(--bg2); }
+  .student-name { font-weight: 500; color: var(--tx1); }
+  .student-detail { font-size: 11px; color: var(--tx2); }
+  .progress-bar-wrap { height: 6px; background: var(--bg2); border-radius: 3px; width: 100%; }
+  .progress-bar-fill { height: 100%; border-radius: 3px; }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: var(--rmd); font-weight: 500; }
+  .badge-ok { background: #eaf3de; color: #3b6d11; }
+  .badge-warn { background: #faeeda; color: #854f0b; }
+  .badge-alert { background: #fcebeb; color: #a32d2d; }
+  .report-section { background: var(--bg1); border-radius: var(--rlg); border: 0.5px solid var(--bd1); padding: 14px 16px; }
+  .report-title { font-size: 13px; font-weight: 500; color: var(--tx1); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .ai-badge { font-size: 10px; padding: 2px 7px; background: #eeedfe; color: #534ab7; border-radius: var(--rmd); font-weight: 500; }
+  .report-text { font-size: 13px; color: var(--tx2); line-height: 1.65; white-space: pre-wrap; }
+  .report-loading { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--tx2); }
+  .spinner { width: 14px; height: 14px; border: 1.5px solid var(--bd2); border-top-color: var(--tx2); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .select-student-prompt { font-size: 13px; color: var(--tx3); font-style: italic; text-align: center; padding: 8px 0; }
+  .branding { text-align: center; padding: 10px; font-size: 11px; color: rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="app-shell">
+    <div class="top-bar">
+      <button class="tab-btn active" id="tab-student" onclick="switchTab('student')">
+        <span>Estudiante</span>
+        <span style="font-size:11px;background:#eaf3de;color:#3b6d11;padding:2px 6px;border-radius:10px;">simulación WA</span>
+      </button>
+      <button class="tab-btn" id="tab-teacher" onclick="switchTab('teacher')">
+        <span>Docente</span>
+        <span style="font-size:11px;background:#eeedfe;color:#534ab7;padding:2px 6px;border-radius:10px;">panel + IA</span>
+      </button>
+    </div>
+
+    <div class="view active" id="view-student">
+      <div class="wa-shell">
+        <div class="wa-header">
+          <div class="wa-avatar">A</div>
+          <div>
+            <div class="wa-header-name">Amautai</div>
+            <div class="wa-header-status">Asistente educativo · en línea</div>
+          </div>
+          <div class="day-pill" id="day-pill">Día 1</div>
+        </div>
+        <div class="wa-messages" id="wa-messages"></div>
+        <div class="wa-input-row">
+          <input class="wa-input" id="wa-input" placeholder="Escribe tu respuesta..." onkeydown="if(event.key==='Enter')sendMsg()" />
+          <button class="wa-send" onclick="sendMsg()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-teacher">
+      <div class="dash">
+        <div class="dash-header">
+          <div class="dash-title">Panel docente — Pensamiento computacional</div>
+          <button class="gen-report-btn" onclick="generateClassReport()">Generar informe general ↗</button>
+        </div>
+        <div class="metrics-row">
+          <div class="metric-card"><div class="metric-label">Estudiantes activos</div><div class="metric-val" id="m-active">—</div><div class="metric-sub">esta semana</div></div>
+          <div class="metric-card"><div class="metric-label">Ejercicios completados</div><div class="metric-val" id="m-exercises">—</div><div class="metric-sub">en total</div></div>
+          <div class="metric-card"><div class="metric-label">Promedio de aciertos</div><div class="metric-val" id="m-avg">—</div><div class="metric-sub">todos los estudiantes</div></div>
+          <div class="metric-card"><div class="metric-label">Necesitan atención</div><div class="metric-val" id="m-alert">—</div><div class="metric-sub">debajo del 50%</div></div>
+        </div>
+        <div class="students-table">
+          <div class="table-head"><div>Estudiante</div><div>Tema actual</div><div>Ejercicios</div><div>Avance</div><div>Estado</div></div>
+          <div id="student-rows"></div>
+        </div>
+        <div class="report-section">
+          <div class="report-title"><span>Informe IA</span><span class="ai-badge">Amautai</span></div>
+          <div class="select-student-prompt" id="report-prompt">Selecciona un estudiante para ver su informe personalizado.</div>
+          <div class="report-text" id="report-text" style="display:none"></div>
+          <div class="report-loading" id="report-loading" style="display:none"><div class="spinner"></div><span>Generando análisis...</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="branding">Amautai — Prototipo · Proyecto educativo</div>
+</div>
+
+<script>
+const API_URL = "https://api.anthropic.com/v1/messages";
+
+const TOPIC_ORDER = ['secuencias','bucles','condicionales','bucles_anidados','bucles_y_condicionales'];
+const TOPIC_NAMES = { secuencias:'Secuencias', bucles:'Bucles', condicionales:'Condicionales', bucles_anidados:'Bucles anidados', bucles_y_condicionales:'Bucles y condicionales' };
+const TOPIC_EMOJI = { secuencias:'🔢', bucles:'🔄', condicionales:'❓', bucles_anidados:'🔁', bucles_y_condicionales:'⚙️' };
+
+const EXERCISES = {
+  secuencias: [
+    {
+      q: "🔢 *Tema de hoy: Secuencias*\n\nUna secuencia es una lista de pasos en orden. ¡El orden importa!\n\n*Ejercicio 1:* Rita quiere preparar jugo. Los pasos están desordenados:\n① Beber el jugo\n② Poner la fruta en la licuadora\n③ Pelar la fruta\n④ Encender la licuadora\n\n¿Cuál es el orden correcto?",
+      opts: ["A) ③ → ② → ④ → ①","B) ② → ③ → ① → ④","C) ④ → ③ → ② → ①","D) ① → ③ → ② → ④"],
+      correct: "A",
+      why_correct: "El orden correcto es pelar → poner en licuadora → encender → beber. Cada paso depende del anterior: no puedes licuar sin pelar, y no puedes beber sin licuar.",
+      why_wrong: { B:"Poner la fruta sin pelarla (③ va antes de ②) no funciona. Además beber antes de licuar es imposible.", C:"Encender la licuadora vacía no sirve de nada. Los ingredientes deben estar listos antes de operar la máquina.", D:"Beber al inicio es imposible porque aún no hay jugo. El resultado no puede ocurrir antes de las acciones que lo producen." }
+    },
+    {
+      q: "*Ejercicio 2:* Un robot va al colegio. Ordena estos pasos:\n① Llegar al colegio\n② Salir de casa\n③ Ponerse la mochila\n④ Caminar hasta el colegio\n\n¿Cuál es el orden correcto?",
+      opts: ["A) ② → ③ → ④ → ①","B) ③ → ② → ④ → ①","C) ① → ② → ③ → ④","D) ③ → ④ → ② → ①"],
+      correct: "B",
+      why_correct: "Primero te pones la mochila (③), luego sales de casa (②), caminas (④) y llegas (①). Es la secuencia lógica de prepararse y trasladarse.",
+      why_wrong: { A:"Salir de casa antes de ponerte la mochila obliga a volver a entrar. Las secuencias evitan pasos innecesarios.", C:"Llegar al colegio al inicio es imposible: aún estás en casa.", D:"Caminar antes de salir de casa es contradictorio: si estás adentro, no puedes caminar hacia el colegio." }
+    },
+    {
+      q: "*Ejercicio 3:* ¿Qué problema tiene esta secuencia para lavarse los dientes?\n① Cepillarse\n② Escupir la pasta\n③ Poner pasta en el cepillo\n④ Mojarse la boca\n\n¿Qué está mal?",
+      opts: ["A) El paso ① está mal","B) El paso ③ debería ir antes de ①","C) No hay ningún error","D) El paso ② debería ir al inicio"],
+      correct: "B",
+      why_correct: "La pasta (③) debe ir en el cepillo ANTES de cepillarse (①). Sin pasta lista, el cepillado no tiene sentido. La secuencia correcta sería: mojar → poner pasta → cepillar → escupir.",
+      why_wrong: { A:"Cepillarse no está mal como acción, solo está mal ubicado: ocurre antes de tener la pasta lista en el cepillo.", C:"Sí hay un error: la pasta aparece después del cepillado.", D:"Escupir al final sí es correcto — es el último paso natural del proceso." }
+    }
+  ],
+  bucles: [
+    {
+      q: "🔄 *Tema de hoy: Bucles*\n\nUn bucle repite una instrucción varias veces sin escribirla una y otra vez.\n\n*Ejercicio 1:* Un robot saluda a 4 personas:\n```\nRepetir 4 veces:\n  → Saludar\n```\n¿Cuántas veces saluda el robot?",
+      opts: ["A) 1 vez","B) 2 veces","C) 4 veces","D) 8 veces"],
+      correct: "C",
+      why_correct: "El bucle ejecuta 'Saludar' exactamente 4 veces. El número después de 'Repetir' indica cuántas veces se ejecuta el bloque interior.",
+      why_wrong: { A:"1 vez sería sin bucle, ejecutando la instrucción una sola vez.", B:"2 veces no corresponde a ningún valor del código.", D:"8 sería si el bucle dijera 'Repetir 8 veces' o hubiera dos bucles de 4." }
+    },
+    {
+      q: "*Ejercicio 2:* Un robot pinta cuadros:\n```\nRepetir hasta que no queden cuadros:\n  → Pintar cuadro\n  → Moverse al siguiente\n```\nHay 5 cuadros. ¿Cuántas veces se ejecuta 'Moverse'?",
+      opts: ["A) 4 veces","B) 5 veces","C) 6 veces","D) 10 veces"],
+      correct: "B",
+      why_correct: "El bucle recorre los 5 cuadros. En cada vuelta ejecuta pintar Y moverse. Como hay 5 cuadros, el bloque se repite 5 veces, incluyendo 'Moverse' 5 veces.",
+      why_wrong: { A:"4 sería si el robot parara antes del último cuadro. El bucle ejecuta ambas instrucciones en cada vuelta completa.", C:"6 implicaría un cuadro extra que no existe.", D:"10 sería contar las dos instrucciones por separado (5 pintar + 5 mover), pero la pregunta pide solo 'Moverse'." }
+    },
+    {
+      q: "*Ejercicio 3:* ¿Cuántas veces se imprime '¡Hola!' con este código?\n```\nRepetir 3 veces:\n  Repetir 2 veces:\n    → Imprimir '¡Hola!'\n```",
+      opts: ["A) 2 veces","B) 3 veces","C) 5 veces","D) 6 veces"],
+      correct: "D",
+      why_correct: "Hay dos bucles: el exterior repite 3 veces, y en cada repetición el interior ejecuta 2 veces. 3 × 2 = 6 impresiones. Este anticipo de bucles anidados muestra que se multiplican.",
+      why_wrong: { A:"2 es solo el valor del bucle interior, ignorando que ese interior se repite 3 veces.", B:"3 es solo el valor del exterior, ignorando que dentro hay otro bucle.", C:"5 sería sumar (3+2), pero los bucles anidados se multiplican: 3 × 2 = 6." }
+    }
+  ],
+  condicionales: [
+    {
+      q: "❓ *Tema de hoy: Condicionales*\n\nUna condicional toma decisiones: SI algo es verdadero hace una cosa; SINO, hace otra.\n\n*Ejercicio 1:* El semáforo usa:\n```\nSI luz = roja ENTONCES\n  → Detenerse\nSINO\n  → Avanzar\n```\n¿Qué hace el auto si la luz está VERDE?",
+      opts: ["A) Se detiene","B) Avanza","C) No hace nada","D) Da media vuelta"],
+      correct: "B",
+      why_correct: "La condición verifica si la luz es roja. Verde NO es roja, la condición es FALSA y se ejecuta el SINO: avanzar.",
+      why_wrong: { A:"Detenerse solo ocurre cuando la luz ES roja (condición verdadera). Verde activa el SINO.", C:"'No hacer nada' no existe aquí: el SINO siempre se ejecuta cuando la condición es falsa.", D:"Dar media vuelta no está en el código. Solo existen dos opciones: detenerse o avanzar." }
+    },
+    {
+      q: "*Ejercicio 2:* Un juego comprueba tu puntaje:\n```\nSI puntos >= 100 ENTONCES\n  → '¡Ganaste!'\nSINO SI puntos >= 50 ENTONCES\n  → 'Casi...'\nSINO\n  → 'Sigue intentando'\n```\n¿Qué se muestra con 75 puntos?",
+      opts: ["A) ¡Ganaste!","B) Casi...","C) Sigue intentando","D) Nada"],
+      correct: "B",
+      why_correct: "75 no es ≥ 100 (primera condición falsa). Luego: ¿75 ≥ 50? Sí, verdadero → se muestra 'Casi...'. Las condiciones se evalúan en orden y se detienen en la primera verdadera.",
+      why_wrong: { A:"¡Ganaste! requiere 100 o más. Con 75 la primera condición falla.", C:"'Sigue intentando' solo aparece si AMBAS condiciones anteriores son falsas. Como 75 ≥ 50 es verdadero, no llegamos al último SINO.", D:"Siempre se muestra algo. Una cadena SI-SINO SI-SINO cubre todos los casos posibles." }
+    },
+    {
+      q: "*Ejercicio 3:* Un robot reparte paraguas:\n```\nSI llueve = verdadero ENTONCES\n  → Dar paraguas\n```\n¿Qué pasa si NO llueve?",
+      opts: ["A) Da paraguas igual","B) No hace nada (no hay SINO)","C) Rompe el paraguas","D) Pregunta si quieres paraguas"],
+      correct: "B",
+      why_correct: "Este condicional no tiene SINO. Cuando la condición es falsa (no llueve), el bloque se salta completamente. Es válido tener un SI sin SINO.",
+      why_wrong: { A:"Sin condición verdadera, el bloque interior nunca se ejecuta.", C:"Romper el paraguas no está en ninguna parte del código.", D:"El código no tiene ninguna instrucción para preguntar. Solo evalúa y actúa o no actúa." }
+    }
+  ],
+  bucles_anidados: [
+    {
+      q: "🔁 *Tema de hoy: Bucles anidados*\n\nUn bucle anidado es un bucle dentro de otro. Por cada vuelta del exterior, el interior se completa entero.\n\n*Ejercicio 1:* ¿Cuántas veces se imprime '★'?\n```\nRepetir 3 veces:      ← exterior\n  Repetir 4 veces:    ← interior\n    → Imprimir '★'\n```",
+      opts: ["A) 3 veces","B) 4 veces","C) 7 veces","D) 12 veces"],
+      correct: "D",
+      why_correct: "Por cada una de las 3 vueltas del exterior, el interior imprime '★' 4 veces. 3 × 4 = 12 en total. Los bucles anidados multiplican sus repeticiones.",
+      why_wrong: { A:"3 es solo el contador exterior. Ignora que por cada vuelta se ejecutan 4 interiores.", B:"4 es solo el interior, como si el exterior no existiera.", C:"7 sería 3+4 (sumar). Los bucles anidados se multiplican: 3 × 4 = 12." }
+    },
+    {
+      q: "*Ejercicio 2:* Un robot dibuja una cuadrícula:\n```\nRepetir 5 veces:     ← filas\n  Repetir 5 veces:   ← columnas\n    → Dibujar punto\n  → Bajar a siguiente fila\n```\n¿Cuántos puntos dibuja en total?",
+      opts: ["A) 5 puntos","B) 10 puntos","C) 25 puntos","D) 30 puntos"],
+      correct: "C",
+      why_correct: "5 filas × 5 columnas = 25 puntos. El bucle exterior controla las filas y el interior llena cada fila con 5 puntos.",
+      why_wrong: { A:"5 sería si solo hubiera una fila (un solo bucle).", B:"10 sería 5+5 (sumar). Los bucles anidados se multiplican: 5 × 5 = 25.", D:"30 no corresponde a ninguna operación con los valores 5 y 5." }
+    },
+    {
+      q: "*Ejercicio 3:* Tres bucles anidados:\n```\nRepetir 2 veces:\n  Repetir 3 veces:\n    Repetir 2 veces:\n      → Imprimir 'X'\n```\n¿Cuántas veces se imprime 'X'?",
+      opts: ["A) 6 veces","B) 7 veces","C) 12 veces","D) 18 veces"],
+      correct: "C",
+      why_correct: "Con tres bucles anidados se multiplican todos: 2 × 3 × 2 = 12. El más interior se ejecuta completo por cada vuelta del medio, y ese conjunto se repite por el exterior.",
+      why_wrong: { A:"6 sería 2 × 3, ignorando el tercer bucle interior.", B:"7 sería sumar los tres valores (2+3+2). Los bucles anidados se multiplican.", D:"18 sería 3 × 3 × 2 u otra combinación incorrecta. La multiplicación correcta es 2 × 3 × 2 = 12." }
+    }
+  ],
+  bucles_y_condicionales: [
+    {
+      q: "⚙️ *Tema de hoy: Bucles y condicionales*\n\nCombinamos bucles (repetir) con condicionales (decidir) para crear programas más inteligentes.\n\n*Ejercicio 1:* ¿Qué imprime este código?\n```\nRepetir con i = 1, 2, 3, 4, 5:\n  SI i es par ENTONCES\n    → Imprimir i\n```",
+      opts: ["A) 1 2 3 4 5","B) 2 4","C) 1 3 5","D) Nada"],
+      correct: "B",
+      why_correct: "El bucle recorre i = 1 a 5. La condición solo imprime cuando i es par. De los 5 valores, solo 2 y 4 son pares. El condicional dentro del bucle actúa como filtro.",
+      why_wrong: { A:"Imprimir todos ignoraría el filtro 'SI es par'.", C:"1, 3, 5 son los impares. La condición dice par, no impar.", D:"No imprimir nada ocurriría si ningún valor fuera par. Pero 2 y 4 sí son pares." }
+    },
+    {
+      q: "*Ejercicio 2:* Un robot recoge manzanas:\n```\nRepetir hasta que canasta llena:\n  SI hay manzana ENTONCES\n    → Recoger manzana\n  SINO\n    → Avanzar\n```\n¿Qué hace cuando NO hay manzana en su posición?",
+      opts: ["A) Llena la canasta","B) Recoge igual","C) Avanza al siguiente lugar","D) Se detiene"],
+      correct: "C",
+      why_correct: "Cuando 'hay manzana' es falso, se ejecuta el SINO: avanzar. El robot sigue moviéndose buscando manzanas. El bucle continúa hasta que la canasta esté llena.",
+      why_wrong: { A:"Llenar la canasta es la condición de parada del bucle, no una acción directa.", B:"Recoger sin manzana sería ejecutar el bloque SI cuando la condición es falsa. Los condicionales nunca hacen eso.", D:"Detenerse no está en el código. El bucle solo para cuando la canasta está llena." }
+    },
+    {
+      q: "*Ejercicio 3:* Cuenta cuántos números del 1 al 10 son mayores que 6:\n```\ncontador = 0\nRepetir con n = 1 hasta 10:\n  SI n > 6 ENTONCES\n    → contador = contador + 1\nMostrar contador\n```\n¿Qué muestra el programa?",
+      opts: ["A) 3","B) 4","C) 6","D) 10"],
+      correct: "B",
+      why_correct: "Números del 1 al 10 mayores que 6: 7, 8, 9, 10 → exactamente 4. El contador empieza en 0 y suma 1 por cada número que cumple la condición.",
+      why_wrong: { A:"3 contaría solo 8, 9, 10 (mayores que 7). La condición es estrictamente mayor que 6, por lo que el 7 también cuenta.", C:"6 sería la cantidad de números que NO cumplen la condición (1 al 6).", D:"10 sería si contáramos todos los números sin aplicar el filtro." }
+    }
+  ]
+};
+
+// ── CHAT STATE ──
+let state = { step:'init', dayIndex:0, exerciseIndex:0, score:0, total:0, studentName:'' };
+function currentTopic() { return TOPIC_ORDER[state.dayIndex]; }
+function currentExList() { return EXERCISES[currentTopic()]; }
+
+// ── DASHBOARD DATA ──
+const STUDENTS = [
+  { name:"Sofía Quispe",   exercises:12, correct:10, dayIndex:2, notes:"Destaca en secuencias y bucles. Dificultad leve con condicionales." },
+  { name:"Diego Mamani",   exercises:8,  correct:4,  dayIndex:1, notes:"Confunde condición de parada. Necesita refuerzo en bucles." },
+  { name:"Lucía Condori",  exercises:15, correct:13, dayIndex:4, notes:"Excelente rendimiento. Lista para proyectos integradores." },
+  { name:"Carlos Huanca",  exercises:5,  correct:2,  dayIndex:0, notes:"Avance lento. Solo completó el tema de secuencias." },
+  { name:"Valentina Cruz", exercises:10, correct:7,  dayIndex:1, notes:"Progreso estable. Bucles en proceso de consolidación." },
+];
+
+function pct(s) { return Math.round((s.correct/s.exercises)*100); }
+function barColor(p) { return p>=70?'#639922':p>=50?'#ef9f27':'#e24b4a'; }
+function statusBadge(p) {
+  if(p>=70) return '<span class="badge badge-ok">Bien</span>';
+  if(p>=50) return '<span class="badge badge-warn">Regular</span>';
+  return '<span class="badge badge-alert">Atención</span>';
+}
+
+function buildDashboard() {
+  document.getElementById('m-active').textContent = STUDENTS.length;
+  document.getElementById('m-exercises').textContent = STUDENTS.reduce((a,s)=>a+s.exercises,0);
+  document.getElementById('m-avg').textContent = Math.round(STUDENTS.reduce((a,s)=>a+pct(s),0)/STUDENTS.length)+'%';
+  document.getElementById('m-alert').textContent = STUDENTS.filter(s=>pct(s)<50).length;
+  const rows = document.getElementById('student-rows');
+  rows.innerHTML = '';
+  STUDENTS.forEach(s => {
+    const p = pct(s);
+    const topicName = TOPIC_NAMES[TOPIC_ORDER[s.dayIndex]] || '—';
+    const d = document.createElement('div');
+    d.className = 'student-row';
+    d.innerHTML = `
+      <div><div class="student-name">${s.name}</div><div class="student-detail">Día ${s.dayIndex+1} de 5</div></div>
+      <div style="font-size:12px;color:var(--tx2)">${topicName}</div>
+      <div style="color:var(--tx2)">${s.correct}/${s.exercises}</div>
+      <div>
+        <div style="font-size:12px;margin-bottom:3px;color:var(--tx2)">${p}%</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${p}%;background:${barColor(p)}"></div></div>
+      </div>
+      <div>${statusBadge(p)}</div>`;
+    d.onclick = () => generateStudentReport(s);
+    rows.appendChild(d);
+  });
+}
+
+// ── CLAUDE API ──
+async function callClaude(prompt) {
+  const r = await fetch(API_URL, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user',content:prompt}] })
+  });
+  const d = await r.json();
+  return d.content?.map(b=>b.text||'').join('')||'';
+}
+
+async function generateStudentReport(student) {
+  document.getElementById('report-prompt').style.display = 'none';
+  document.getElementById('report-text').style.display = 'none';
+  document.getElementById('report-loading').style.display = 'flex';
+  const p = pct(student);
+  const topicName = TOPIC_NAMES[TOPIC_ORDER[student.dayIndex]];
+  try {
+    const text = await callClaude(`Eres Amautai, asistente educativo para docentes de primaria en Perú.
+Genera un informe (3-4 párrafos) sobre el progreso del/la estudiante en pensamiento computacional:
+Nombre: ${student.name} | Tema actual: ${topicName} (día ${student.dayIndex+1} de 5)
+Ejercicios: ${student.exercises}, Correctos: ${student.correct} (${p}%)
+Notas: ${student.notes}
+Incluye: resumen del desempeño, fortalezas, áreas de mejora, 2-3 recomendaciones concretas. Tono amigable. Español.`);
+    document.getElementById('report-loading').style.display = 'none';
+    const rt = document.getElementById('report-text');
+    rt.textContent = text; rt.style.display = 'block';
+  } catch(e) {
+    document.getElementById('report-loading').style.display = 'none';
+    document.getElementById('report-text').textContent = 'Error al generar el informe.';
+    document.getElementById('report-text').style.display = 'block';
+  }
+}
+
+async function generateClassReport() {
+  document.getElementById('report-prompt').style.display = 'none';
+  document.getElementById('report-text').style.display = 'none';
+  document.getElementById('report-loading').style.display = 'flex';
+  const summary = STUDENTS.map(s=>`${s.name}: ${pct(s)}% aciertos, tema actual: ${TOPIC_NAMES[TOPIC_ORDER[s.dayIndex]]}`).join('\n');
+  try {
+    const text = await callClaude(`Eres Amautai, asistente educativo.
+Genera un informe general del salón (4-5 párrafos) sobre pensamiento computacional:
+${summary}
+Incluye: panorama general, quiénes destacan, quiénes necesitan apoyo urgente, patrones de dificultad, recomendaciones. Tono profesional. Español.`);
+    document.getElementById('report-loading').style.display = 'none';
+    const rt = document.getElementById('report-text');
+    rt.textContent = text; rt.style.display = 'block';
+  } catch(e) {
+    document.getElementById('report-loading').style.display = 'none';
+    document.getElementById('report-text').textContent = 'Error al generar el informe.';
+    document.getElementById('report-text').style.display = 'block';
+  }
+}
+
+// ── CHAT HELPERS ──
+function getTime() { return new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}); }
+
+function renderText(t) {
+  return t
+    .replace(/```([\s\S]*?)```/g,'<pre style="background:#f5f5f3;padding:8px 10px;border-radius:6px;font-size:11px;margin:6px 0;overflow-x:auto;line-height:1.5;white-space:pre">$1</pre>')
+    .replace(/\*(.*?)\*/g,'<strong>$1</strong>')
+    .replace(/\n/g,'<br>');
+}
+
+function addMsg(text, type, opts=null, feedbackHtml=null) {
+  const container = document.getElementById('wa-messages');
+  const typing = document.querySelector('.typing-indicator');
+  const div = document.createElement('div');
+  div.className = `msg ${type}`;
+  let inner = '';
+  if (text) inner += `<div>${renderText(text)}</div>`;
+  if (feedbackHtml) inner += feedbackHtml;
+  inner += `<div class="msg-time">${getTime()}</div>`;
+  div.innerHTML = inner;
+  if (opts) {
+    const ol = document.createElement('div');
+    ol.className = 'options-list';
+    opts.forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = o;
+      b.onclick = () => handleOption(o);
+      ol.appendChild(b);
+    });
+    div.appendChild(ol);
+  }
+  if (typing) container.insertBefore(div, typing);
+  else container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTyping() {
+  const c = document.getElementById('wa-messages');
+  const t = document.createElement('div');
+  t.className = 'typing-indicator show';
+  t.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  c.appendChild(t);
+  c.scrollTop = c.scrollHeight;
+}
+function removeTyping() { const t = document.querySelector('.typing-indicator'); if(t) t.remove(); }
+function botSay(text, delay=1100, opts=null, feedbackHtml=null) {
+  return new Promise(res => { showTyping(); setTimeout(()=>{ removeTyping(); addMsg(text,'bot',opts,feedbackHtml); res(); }, delay); });
+}
+
+function handleOption(opt) {
+  addMsg(opt, 'user');
+  document.querySelectorAll('.opt-btn').forEach(b=>{ b.disabled=true; b.style.opacity='0.55'; });
+  processInput(opt.trim().charAt(0).toUpperCase());
+}
+
+// ── MAIN FLOW ──
+async function processInput(input) {
+  const s = state;
+
+  if (s.step === 'ask_name') {
+    s.studentName = input.trim() || 'Estudiante';
+    s.step = 'exercise';
+    const topic = currentTopic();
+    const dayNum = s.dayIndex + 1;
+    document.getElementById('day-pill').textContent = `Día ${dayNum}`;
+    await botSay(`¡Hola *${s.studentName}*! 🌟 Bienvenido/a a Amautai.\n\nHoy es el *Día ${dayNum}* y trabajaremos: *${TOPIC_EMOJI[topic]} ${TOPIC_NAMES[topic]}*.\n\n¡Empecemos!`, 1000);
+    await sendExercise();
+    return;
+  }
+
+  if (s.step === 'exercise') {
+    const ex = currentExList()[s.exerciseIndex];
+    const answer = input.toUpperCase();
+    const correct = answer === ex.correct;
+    s.total++;
+    if (correct) s.score++;
+
+    let feedbackHtml;
+    if (correct) {
+      feedbackHtml = `<div class="feedback-box correct"><strong>✅ ¡Correcto!</strong><br>${ex.why_correct}</div>`;
+    } else {
+      const wrongReason = ex.why_wrong[answer] || 'Esa opción no es la correcta para este ejercicio.';
+      feedbackHtml = `<div class="feedback-box wrong"><strong>❌ Esa no es la respuesta correcta.</strong><br><strong>Por qué tu opción (${answer}) no funciona:</strong> ${wrongReason}<br><br><strong>La opción correcta era ${ex.correct}:</strong> ${ex.why_correct}</div>`;
+    }
+    await botSay('', 800, null, feedbackHtml);
+
+    s.exerciseIndex++;
+    if (s.exerciseIndex < currentExList().length) {
+      await botSay('¡Siguiente ejercicio! 🚀', 600);
+      await sendExercise();
+    } else {
+      s.step = 'done';
+      const p = Math.round((s.score/s.total)*100);
+      const emoji = p>=80?'🌟':p>=50?'👍':'💪';
+      await botSay(`${emoji} *¡Terminaste el Día ${s.dayIndex+1}!*\nObtuviste *${s.score} de ${s.total}* respuestas correctas (${p}%).\n\nTu progreso fue enviado a tu docente. ¡Hasta mañana con un nuevo tema!`, 1200);
+      updateDashboard(s);
+    }
+    return;
+  }
+
+  if (s.step === 'done') {
+    await botSay('¡Ya terminaste los ejercicios de hoy! 🎉 Vuelve mañana para el siguiente tema.', 700);
+  }
+}
+
+async function sendExercise() {
+  const ex = currentExList()[state.exerciseIndex];
+  const num = state.exerciseIndex + 1;
+  const total = currentExList().length;
+  await botSay(`*(${num}/${total})* ${ex.q}`, 1200, ex.opts);
+}
+
+function updateDashboard(s) {
+  const match = STUDENTS.find(st => st.name.toLowerCase().split(' ')[0] === (s.studentName||'').toLowerCase().split(' ')[0]);
+  if (match) {
+    match.exercises += s.total;
+    match.correct += s.score;
+    match.dayIndex = Math.min(match.dayIndex+1, TOPIC_ORDER.length-1);
+    buildDashboard();
+  }
+}
+
+function switchTab(tab) {
+  ['student','teacher'].forEach(t => {
+    document.getElementById(`view-${t}`).classList.toggle('active', t===tab);
+    document.getElementById(`tab-${t}`).classList.toggle('active', t===tab);
+  });
+}
+
+function sendMsg() {
+  const input = document.getElementById('wa-input');
+  const val = input.value.trim();
+  if (!val) return;
+  input.value = '';
+  addMsg(val, 'user');
+  processInput(val);
+}
+
+async function init() {
+  buildDashboard();
+  await botSay('¡Hola! 👋 Soy *Amautai*, tu compañero de aprendizaje.\n\n¿Cuál es tu nombre?', 800);
+  state.step = 'ask_name';
+}
+
+setTimeout(init, 300);
+</script>
+</body>
+</html>
