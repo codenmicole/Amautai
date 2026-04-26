@@ -87,17 +87,12 @@ body {
 }
 
 /* Hero */
-.hero {
-    padding: 100px 5%;
-    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-    text-align: center;
-}
 
-.hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+.hero-text h1 { font-size: 2.5rem; margin-bottom: 1rem; }
 
-.hero span { color: var(--principal); }
+.hero-text span { color: var(--principal); }
 
-.cta-button {
+.btn-primary {
     display: inline-block;
     margin-top: 20px;
     padding: 15px 35px;
@@ -107,6 +102,38 @@ body {
     border-radius: 30px;
     font-weight: bold;
     transition: 0.3s;
+}
+
+.btn-secondary {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 15px 35px;
+    background: var(--acento);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.hero-section {
+    padding: 100px 5% 60px;
+    background: #f8f9fa;
+}
+.hero-container {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.hero-image img {
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+@media (max-width: 768px) {
+    .hero-container { flex-direction: column; text-align: center; }
 }
 
 /* Secciones */
@@ -128,7 +155,201 @@ body {
 
 .card:hover { transform: translateY(-10px); }
 
+/* --- SECCIÓN METODOLOGÍA --- */
+.methodology-section {
+    padding: 80px 10%;
+    background-color: #130f40; /* Fondo azul oscuro para contrastar con la sección anterior */
+    color: white;
+}
+
+.methodology-section .section-title {
+    color: white;
+    text-align: center;
+}
+
+.methodology-section .section-subtitle {
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.methodology-steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    position: relative;
+}
+
+.step {
+    display: flex;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 30px;
+    border-radius: 15px;
+    border-left: 5px solid #22A6B3;
+    transition: 0.3s;
+}
+
+.step:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.02);
+}
+
+.step-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #22A6B3;
+    opacity: 0.5;
+    line-height: 1;
+}
+
+.step-content h3 {
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+    color: #22A6B3;
+}
+
+.step-content p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+}
+
+/* Ajuste móvil */
+@media (max-width: 850px) {
+    .methodology-steps {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- SECCIÓN BENEFICIOS DOCENTE --- */
+.teacher-benefits {
+    padding: 80px 10%;
+    background-color: #ffffff;
+    text-align: center;
+}
+
+.section-title {
+    font-size: 2.2rem;
+    color: #130f40;
+    margin-bottom: 10px;
+}
+
+.section-title span {
+    color: #22A6B3;
+}
+
+.section-subtitle {
+    color: #666;
+    margin-bottom: 50px;
+    font-size: 1.1rem;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.benefit-card {
+    padding: 30px;
+    background: #f9f9f9;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    border-bottom: 4px solid transparent;
+}
+
+.benefit-card:hover {
+    transform: translateY(-10px);
+    background: white;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    border-bottom: 4px solid #22A6B3;
+}
+
+.benefit-icon {
+    font-size: 2.5rem;
+    color: #22A6B3;
+    margin-bottom: 20px;
+}
+
+.benefit-card h3 {
+    color: #130f40;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.benefit-card p {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+.teacher-quote {
+    margin-top: 60px;
+    font-style: italic;
+    color: #130f40;
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+.container-flex {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    padding: 60px 0;
+}
+.benefit-img img {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 15px;
+}
+
+/* Adaptación móvil */
+@media (max-width: 768px) {
+    .teacher-benefits { padding: 50px 5%; }
+}
+
 /* Espacio Prototipo */
+
+/* --- ESTILO PARA TÍTULOS DE SECCIÓN --- */
+
+.text-center, .prototipo-preview div:first-child {
+    text-align: center; /* Centra el texto */
+    margin-bottom: 40px;
+    padding: 20px;
+}
+
+h2 {
+    font-family: 'Montserrat', sans-serif; /* O la fuente que estés usando */
+    font-size: 2.5rem;
+    color: #130f40; /* El azul oscuro de tu marca */
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+h2 span {
+    color: #22A6B3; /* El turquesa para resaltar "Amautai" o "IA" */
+    position: relative;
+}
+
+/* Línea decorativa debajo del título para que sea "bonito" */
+h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: #22A6B3;
+    margin: 10px auto 0;
+    border-radius: 2px;
+}
+
+.prototipo-preview p {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
 .prototype-section {
     padding: 80px 5%;
     background: var(--oscuro);
@@ -148,6 +369,87 @@ body {
     justify-content: center;
     border-radius: 20px;
 }
+
+/* --- SECCIÓN PROTOTIPO FONDO AZUL --- */
+
+.prototipo-full-azul {
+    background-color: #130f40; /* El azul oscuro de Amautai */
+    padding: 80px 5%;
+    color: white; /* Cambia el texto general a blanco */
+}
+
+.container-titulo-blanco {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.container-titulo-blanco h2 {
+    color: white !important; /* Forzamos que sea blanco */
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.container-titulo-blanco h2 span {
+    color: #22A6B3; /* El turquesa resalta sobre el azul */
+}
+
+/* La línea decorativa debajo del título */
+.container-titulo-blanco h2::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: #22A6B3;
+    margin: 15px auto 0;
+    border-radius: 2px;
+}
+
+.container-titulo-blanco p {
+    color: rgba(255, 255, 255, 0.8); /* Blanco suavizado */
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+}
+
+/* Ajuste de la rejilla (Grid) */
+.proto-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: center;
+}
+
+.proto-mockup, .proto-iframe {
+    flex: 1;
+    min-width: 320px;
+}
+
+.proto-iframe iframe {
+    width: 100%;
+    height: 700px; /* Aumentamos un poco la altura para que el contenido quepa cómodo */
+    border-radius: 20px;
+    border: none; /* Quitamos el borde del iframe para que no cree doble línea */
+    background: white;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    overflow: hidden; /* Evita que el iframe intente mostrar barras propias */
+}
+
+.proto-mockup img {
+    width: 100%;
+    height: 700px; /* Forzamos a que la imagen mida lo mismo que el simulador */
+    object-fit: cover; /* Esto hace que la imagen se recorte un poquito pero no se estire feo */
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+/* Responsivo para celulares */
+@media (max-width: 768px) {
+    .prototipo-full-azul { padding: 50px 20px; }
+    .proto-mockup { display: none; } /* En móvil mejor solo mostrar el simulador */
+}
+
 
 /* --- SECCIÓN DE INSCRIPCIÓN --- */
 .registration-section {
